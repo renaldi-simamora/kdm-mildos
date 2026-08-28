@@ -962,7 +962,7 @@
                 {{-- Header --}}
                 <div class="content-header">
                     <div>
-                        <div class="content-title" id="greeting-title">Selamat datang, {{ auth()->user()->name ?? 'Admin' }} 👋</div>
+                        <div class="content-title" id="greeting-title">{{ $greeting }}, {{ auth()->user()->name ?? 'Admin' }} 👋</div>
                         <div class="content-subtitle">Berikut ringkasan aktivitas HR hari ini.</div>
                     </div>
                 </div>
@@ -1150,42 +1150,47 @@
 
                         </div>{{-- /stat-grid --}}
 
-                        {{-- ROW: Ringkasan Kehadiran + Tren Kehadiran --}}
+                        {{-- ROW: Ringkasan Kehadiran + Employee Overview --}}
                         <div class="dash-row-2">
 
                             {{-- Ringkasan Kehadiran --}}
                             <div class="dash-panel">
                                 <div class="dash-panel-header">
-                                    <div class="dash-panel-title">Ringkasan Kehadiran</div>
+                                    <div class="dash-panel-title">Kehadiran Hari Ini</div>
+                                    <select class="panel-select" id="attendance-period-select" aria-label="Filter periode kehadiran">
+                                        <option value="today">Hari Ini</option>
+                                        <option value="week">7 Hari</option>
+                                        <option value="month">Bulan Ini</option>
+                                    </select>
                                 </div>
                                 <div class="donut-wrapper">
-                                    <div class="donut-chart-container">
+                                    <div class="donut-chart-container" style="width:130px;height:130px;">
                                         <canvas id="attendanceDonutChart"></canvas>
                                         <div class="donut-center-text">
-                                            <div class="title">Total</div>
-                                            <div class="number">{{ $totalAttendance }}</div>
+                                            <div class="number" style="font-size:20px;">{{ $totalAttendance }}</div>
+                                            <div class="title">Total Karyawan</div>
                                         </div>
                                     </div>
                                     <div class="donut-legend">
                                         <div class="legend-item">
-                                            <div class="legend-label"><span class="legend-dot" style="background:#19b95b;"></span><span>On Time</span></div>
-                                            <div class="legend-val">{{ $onTimeCount }} ({{ $onTimePercent }}%)</div>
+                                            <div class="legend-label"><span class="legend-dot" style="background:#19b95b;"></span><span>Hadir (On Time)</span></div>
+                                            <div class="legend-val">{{ $onTimeCount }} &nbsp;<span style="color:#94a3b8;font-weight:500;">{{ number_format($onTimePercent, 1) }}%</span></div>
                                         </div>
                                         <div class="legend-item">
-                                            <div class="legend-label"><span class="legend-dot" style="background:#e8bf00;"></span><span>Late</span></div>
-                                            <div class="legend-val">{{ $lateCount }} ({{ $latePercent }}%)</div>
+                                            <div class="legend-label"><span class="legend-dot" style="background:#e8bf00;"></span><span>Terlambat (Late)</span></div>
+                                            <div class="legend-val">{{ $lateCount }} &nbsp;<span style="color:#94a3b8;font-weight:500;">{{ number_format($latePercent, 1) }}%</span></div>
                                         </div>
                                         <div class="legend-item">
-                                            <div class="legend-label"><span class="legend-dot" style="background:#e5484d;"></span><span>Absent</span></div>
-                                            <div class="legend-val">{{ $absentCount }} ({{ $absentPercent }}%)</div>
+                                            <div class="legend-label"><span class="legend-dot" style="background:#e5484d;"></span><span>Tidak Hadir (Absent)</span></div>
+                                            <div class="legend-val">{{ $absentCount }} &nbsp;<span style="color:#94a3b8;font-weight:500;">{{ number_format($absentPercent, 1) }}%</span></div>
                                         </div>
                                         <div class="legend-item">
-                                            <div class="legend-label"><span class="legend-dot" style="background:#2f7bf6;"></span><span>Excused</span></div>
-                                            <div class="legend-val">{{ $excusedCount }} ({{ $excusedPercent }}%)</div>
+                                            <div class="legend-label"><span class="legend-dot" style="background:#2f7bf6;"></span><span>Izin (Excused)</span></div>
+                                            <div class="legend-val">{{ $excusedCount }} &nbsp;<span style="color:#94a3b8;font-weight:500;">{{ number_format($excusedPercent, 1) }}%</span></div>
                                         </div>
                                         <div class="legend-item">
                                             <div class="legend-label"><span class="legend-dot" style="background:#8b5cf6;"></span><span>Off Day</span></div>
-                                            <div class="legend-val">{{ $offDayCount }} ({{ $offDayPercent }}%)</div>
+                                            <div class="legend-val">{{ $offDayCount }} &nbsp;<span style="color:#94a3b8;font-weight:500;">{{ number_format($offDayPercent, 1) }}%</span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -1194,17 +1199,20 @@
                                 </div>
                             </div>
 
-                            {{-- Tren Kehadiran --}}
+                            {{-- Employee Overview Line Chart --}}
                             <div class="dash-panel">
                                 <div class="dash-panel-header">
-                                    <div class="dash-panel-title">Tren Kehadiran</div>
-                                    <span style="font-size:11px; color: var(--gray-light);">{{ count($trendDays) }} Hari</span>
+                                    <div class="dash-panel-title">Employee Overview</div>
+                                    <select class="panel-select" id="overview-period-select" aria-label="Filter periode employee overview">
+                                        <option value="6">6 Bulan Terakhir</option>
+                                        <option value="3">3 Bulan Terakhir</option>
+                                    </select>
                                 </div>
-                                <div style="position: relative; height: 150px; width: 100%;">
-                                    <canvas id="attendanceTrendChart"></canvas>
+                                <div class="overview-chart-container">
+                                    <canvas id="employeeOverviewChart"></canvas>
                                 </div>
                                 <div class="dash-panel-footer">
-                                    <a href="#" class="panel-link">Lihat Analitik Lengkap &rarr;</a>
+                                    <a href="{{ route('employees.index') }}" class="panel-link">Lihat Detail Karyawan &rarr;</a>
                                 </div>
                             </div>
 
@@ -1296,14 +1304,33 @@
 
                         </div>{{-- /dash-row-2 --}}
 
-                        {{-- Employee Overview --}}
+                        {{-- Ringkasan Karyawan --}}
                         <div class="dash-panel">
                             <div class="dash-panel-header">
-                                <div class="dash-panel-title">Employee Overview</div>
-                                <span style="font-size:11px; color: var(--gray-light);">6 Bulan Terakhir</span>
+                                <div class="dash-panel-title">Ringkasan Karyawan</div>
+                                <span style="font-size:11px; color: var(--gray-light);">Berdasarkan Status</span>
                             </div>
-                            <div class="overview-chart-container">
-                                <canvas id="employeeOverviewChart"></canvas>
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                @php
+                                    $totalEmp = $activeEmployees + $partTimeEmployees + $internshipEmployees + $resignedEmployees + $blacklistedEmployees;
+                                    $totalEmp = $totalEmp ?: 1;
+                                @endphp
+                                @foreach ([
+                                    ['label' => 'Active (Full Time)', 'icon' => 'user-check', 'color' => '#19b95b', 'bg' => '#e9f9ef', 'count' => $activeEmployees],
+                                    ['label' => 'Internship',         'icon' => 'graduation-cap','color' => '#2f7bf6', 'bg' => '#eaf1ff', 'count' => $internshipEmployees],
+                                    ['label' => 'Part Time',          'icon' => 'user-round',   'color' => '#8b5cf6', 'bg' => '#f3e8ff', 'count' => $partTimeEmployees],
+                                    ['label' => 'Resigned',           'icon' => 'user-minus',   'color' => '#94a3b8', 'bg' => '#f0f0ee', 'count' => $resignedEmployees],
+                                    ['label' => 'Blacklisted',        'icon' => 'user-x',       'color' => '#e5484d', 'bg' => '#fdeceb', 'count' => $blacklistedEmployees],
+                                ] as $row)
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <div style="width:30px;height:30px;border-radius:8px;background:{{ $row['bg'] }};color:{{ $row['color'] }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                            <span data-lucide="{{ $row['icon'] }}" style="width:15px;height:15px;"></span>
+                                        </div>
+                                        <div style="flex:1;font-size:12.5px;font-weight:600;color:#0f172a;">{{ $row['label'] }}</div>
+                                        <div style="font-size:13px;font-weight:800;color:#0f172a;min-width:28px;text-align:right;">{{ $row['count'] }}</div>
+                                        <div style="font-size:11.5px;color:#94a3b8;min-width:42px;text-align:right;">{{ number_format(($row['count']/$totalEmp)*100,1) }}%</div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
 
@@ -1354,23 +1381,22 @@
 
                         {{-- Calendar --}}
                         <div class="right-panel">
-                            <div class="right-panel-title">
-                                <span>Kalender</span>
-                            </div>
-
-                            {{-- Calendar Header --}}
-                            <div class="cal-header" id="cal-header">
-                                <div style="display:flex; gap:4px;">
+                            {{-- Calendar Title + Nav --}}
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                                <span style="font-size:13px;font-weight:800;color:#0f172a;">Kalender</span>
+                                <div style="display:flex; align-items:center; gap:4px;">
                                     <button class="cal-nav-btn" id="cal-prev" type="button" aria-label="Bulan sebelumnya">
                                         <span data-lucide="chevron-left"></span>
                                     </button>
                                     <button class="cal-nav-btn" id="cal-next" type="button" aria-label="Bulan berikutnya">
                                         <span data-lucide="chevron-right"></span>
                                     </button>
+                                    <button class="cal-today-btn" id="cal-today-btn" type="button" style="margin-left:4px;">Hari Ini</button>
                                 </div>
-                                <div class="cal-month-label" id="cal-month-label"></div>
-                                <button class="cal-today-btn" id="cal-today-btn" type="button">Hari Ini</button>
                             </div>
+
+                            {{-- Month + Year label --}}
+                            <div class="cal-month-label" id="cal-month-label" style="text-align:center; margin-bottom:8px;"></div>
 
                             {{-- Day-of-week headers --}}
                             <div class="cal-grid" id="cal-dow">
@@ -1464,21 +1490,16 @@
             // Lucide icons
             if (window.lucide) { lucide.createIcons(); }
 
-            // ─── Greeting based on server time ────────────────────────────
-            const serverDate = '{{ $serverDate }}';
-            const serverHour = parseInt(serverDate.split('-')[0]); // fallback
-            try {
-                const now = new Date(serverDate + 'T00:00:00+07:00');
-                const h = now.getHours();
-                const greet = h < 11 ? 'Selamat pagi' : h < 15 ? 'Selamat siang' : h < 18 ? 'Selamat sore' : 'Selamat malam';
-                const el = document.getElementById('greeting-title');
-                if (el) {
-                    el.innerHTML = greet + ', {{ addslashes(auth()->user()->name ?? "Admin") }} 👋';
-                }
-            } catch(e) {}
+            // ─── Greeting based on server hour ────────────────────────────
+            const serverHour = {{ $serverHour }};
+            const greet = serverHour < 11 ? 'Selamat pagi' : serverHour < 15 ? 'Selamat siang' : serverHour < 18 ? 'Selamat sore' : 'Selamat malam';
+            const el = document.getElementById('greeting-title');
+            if (el) {
+                el.innerHTML = greet + ', {{ addslashes(auth()->user()->name ?? "Admin") }} 👋';
+            }
 
             // ─── Interactive Calendar ──────────────────────────────────────
-            const todayServer = serverDate; // 'YYYY-MM-DD'
+            const todayServer = '{{ $serverDate }}'; // 'YYYY-MM-DD'
             const todayParts = todayServer.split('-');
             const todayY = parseInt(todayParts[0]);
             const todayM = parseInt(todayParts[1]) - 1; // 0-indexed
@@ -1666,10 +1687,10 @@
                             {
                                 label: 'Active',
                                 data: {!! json_encode($overviewActive) !!},
-                                borderColor: '#2f7bf6',
+                                borderColor: '#8b5cf6',
                                 borderWidth: 2,
                                 pointRadius: 4,
-                                pointBackgroundColor: '#2f7bf6',
+                                pointBackgroundColor: '#8b5cf6',
                                 pointBorderColor: '#fff',
                                 pointBorderWidth: 2,
                                 tension: 0.3,

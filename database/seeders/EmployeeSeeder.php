@@ -215,7 +215,37 @@ class EmployeeSeeder extends Seeder
             ],
         ];
 
-        foreach ($employees as $item) {
+        $now = now();
+        $staggeredDates = [
+            $now->copy()->subMonths(5)->setDay(10),
+            $now->copy()->subMonths(5)->setDay(15),
+            $now->copy()->subMonths(5)->setDay(20),
+            $now->copy()->subMonths(4)->setDay(5),
+            $now->copy()->subMonths(4)->setDay(12),
+            $now->copy()->subMonths(4)->setDay(18),
+            $now->copy()->subMonths(3)->setDay(8),
+            $now->copy()->subMonths(3)->setDay(22),
+            $now->copy()->subMonths(3)->setDay(25),
+            $now->copy()->subMonths(2)->setDay(4),
+            $now->copy()->subMonths(2)->setDay(14),
+            $now->copy()->subMonths(2)->setDay(28),
+            $now->copy()->subMonths(1)->setDay(2),
+            $now->copy()->subMonths(1)->setDay(16),
+            $now->copy()->subMonths(1)->setDay(20), // Rizky (Resigned)
+            $now->copy()->subMonths(1)->setDay(25), // Hendra (Resigned)
+            $now->copy()->startOfMonth()->setDay(3),
+            $now->copy()->startOfMonth()->setDay(7),
+            $now->copy()->startOfMonth()->setDay(12),
+            $now->copy()->startOfMonth()->setDay(18),
+        ];
+
+        foreach ($employees as $idx => $item) {
+            $created = $staggeredDates[$idx] ?? $now;
+            $updated = $item['status'] === 'Resigned' ? $created->copy()->addDays(20) : $created;
+
+            $item['created_at'] = $created;
+            $item['updated_at'] = $updated;
+
             Employee::updateOrCreate(
                 ['employee_code' => $item['employee_code']],
                 $item

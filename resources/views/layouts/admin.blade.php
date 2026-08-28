@@ -594,7 +594,7 @@
             </nav>
 
             <div class="sidebar-footer">
-                <a href="{{ route('profile.edit') }}" class="nav-item">
+                <a href="{{ route('profile.edit') }}" class="nav-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                     <span data-lucide="settings"></span>
                     Pengaturan
                 </a>

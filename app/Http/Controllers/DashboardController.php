@@ -82,7 +82,8 @@ class DashboardController extends Controller
         $newEmployees = Employee::where('created_at', '>=', $now->copy()->startOfMonth())->count();
 
         // ─── Attendance Counts (filtered range) ───────────────────────────
-        $attendanceQuery = Attendance::whereBetween('date', [$startDateFormatted, $endDateFormatted]);
+        $attendanceQuery = Attendance::whereDate('date', '>=', $startDateFormatted)
+            ->whereDate('date', '<=', $endDateFormatted);
 
         $onTimeCount = (clone $attendanceQuery)->where('status', 'on_time')->count();
         $lateCount = (clone $attendanceQuery)->where('status', 'late')->count();
@@ -92,13 +93,13 @@ class DashboardController extends Controller
 
         $totalAttendance = $onTimeCount + $lateCount + $absentCount + $excusedCount + $offDayCount;
 
-        $onTimePercent = $totalAttendance > 0 ? round(($onTimeCount / $totalAttendance) * 100, 2) : 0;
-        $latePercent = $totalAttendance > 0 ? round(($lateCount / $totalAttendance) * 100, 2) : 0;
-        $absentPercent = $totalAttendance > 0 ? round(($absentCount / $totalAttendance) * 100, 2) : 0;
-        $excusedPercent = $totalAttendance > 0 ? round(($excusedCount / $totalAttendance) * 100, 2) : 0;
-        $offDayPercent = $totalAttendance > 0 ? round(($offDayCount / $totalAttendance) * 100, 2) : 0;
+        $onTimePercent = $totalAttendance > 0 ? round(($onTimeCount / $totalAttendance) * 100, 1) : 0;
+        $latePercent = $totalAttendance > 0 ? round(($lateCount / $totalAttendance) * 100, 1) : 0;
+        $absentPercent = $totalAttendance > 0 ? round(($absentCount / $totalAttendance) * 100, 1) : 0;
+        $excusedPercent = $totalAttendance > 0 ? round(($excusedCount / $totalAttendance) * 100, 1) : 0;
+        $offDayPercent = $totalAttendance > 0 ? round(($offDayCount / $totalAttendance) * 100, 1) : 0;
 
-        // ─── Attendance Trend (7 days rolling in selected range) ──────────
+        // ─── Attendance Trend (dynamic based on selected period) ──────────
         $trendDays = [];
         $trendValues = [];
         $diffInDays = $startDate->diffInDays($endDate);
@@ -106,12 +107,15 @@ class DashboardController extends Controller
         if ($diffInDays === 0) {
             $trendStart = $startDate->copy()->subDays(6);
             $trendEnd = $startDate->copy();
-        } elseif ($diffInDays <= 14) {
+            $trendPeriodLabel = '7 Hari Terakhir';
+        } elseif ($diffInDays <= 30) {
             $trendStart = $startDate->copy();
             $trendEnd = $endDate->copy();
+            $trendPeriodLabel = ($diffInDays + 1).' Hari';
         } else {
-            $trendStart = $endDate->copy()->subDays(6);
+            $trendStart = $endDate->copy()->subDays(29);
             $trendEnd = $endDate->copy();
+            $trendPeriodLabel = '30 Hari Terakhir';
         }
 
         $curr = $trendStart->copy();
@@ -129,15 +133,23 @@ class DashboardController extends Controller
         $overviewResigned = [];
 
         for ($i = 5; $i >= 0; $i--) {
-            $monthStart = $now->copy()->startOfMonth()->subMonths($i);
-            $monthEnd = $monthStart->copy()->endOfMonth();
-            $overviewMonths[] = $monthStart->locale('id')->isoFormat('MMM YYYY');
+            $monthDate = $now->copy()->subMonths($i);
+            $monthStart = $monthDate->copy()->startOfMonth();
+            $monthEnd = $monthDate->copy()->endOfMonth();
+
+            $overviewMonths[] = $monthDate->locale('id')->isoFormat('MMM');
+
             $overviewActive[] = Employee::where('status', 'Active')
-                ->where('created_at', '<=', $monthEnd)
+                ->whereDate('created_at', '<=', $monthEnd)
                 ->count();
-            $overviewNew[] = Employee::whereBetween('created_at', [$monthStart, $monthEnd])->count();
+
+            $overviewNew[] = Employee::whereDate('created_at', '>=', $monthStart)
+                ->whereDate('created_at', '<=', $monthEnd)
+                ->count();
+
             $overviewResigned[] = Employee::where('status', 'Resigned')
-                ->whereBetween('updated_at', [$monthStart, $monthEnd])
+                ->whereDate('updated_at', '>=', $monthStart)
+                ->whereDate('updated_at', '<=', $monthEnd)
                 ->count();
         }
 
@@ -192,6 +204,18 @@ class DashboardController extends Controller
         $newThisMonth = Employee::where('created_at', '>=', $now->copy()->startOfMonth())->count();
         $contractEnding = 0; // placeholder — no contract table yet
 
+        // ─── Greeting based on server hour ────────────────────────────────
+        $serverHour = (int) $now->format('H');
+        if ($serverHour < 11) {
+            $greeting = 'Selamat pagi';
+        } elseif ($serverHour < 15) {
+            $greeting = 'Selamat siang';
+        } elseif ($serverHour < 18) {
+            $greeting = 'Selamat sore';
+        } else {
+            $greeting = 'Selamat malam';
+        }
+
         // ─── Server date (for calendar) ───────────────────────────────────
         $serverDate = $now->format('Y-m-d'); // e.g. "2026-08-28"
 
@@ -226,7 +250,10 @@ class DashboardController extends Controller
             'newThisMonth',
             'contractEnding',
             'selectedDate',
-            'serverDate'
+            'serverDate',
+            'serverHour',
+            'greeting',
+            'trendPeriodLabel'
         ));
     }
 }

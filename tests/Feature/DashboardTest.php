@@ -83,4 +83,53 @@ class DashboardTest extends TestCase
         $response->assertViewHas('absentCount', 0);
         $response->assertViewHas('totalAttendance', 2);
     }
+
+    #[Test]
+    public function dashboard_calculates_single_date_attendance_metrics_accurately(): void
+    {
+        $user = User::factory()->create();
+
+        Attendance::factory()->create(['date' => '2026-08-28', 'status' => 'on_time']);
+        Attendance::factory()->create(['date' => '2026-08-28', 'status' => 'on_time']);
+        Attendance::factory()->create(['date' => '2026-08-28', 'status' => 'absent']);
+
+        $response = $this->actingAs($user)->get(route('dashboard', [
+            'dates' => '2026-08-28',
+        ]));
+
+        $response->assertOk();
+        $response->assertViewHas('onTimeCount', 2);
+        $response->assertViewHas('absentCount', 1);
+        $response->assertViewHas('totalAttendance', 3);
+        $response->assertViewHas('onTimePercent', 66.7);
+        $response->assertViewHas('absentPercent', 33.3);
+    }
+
+    #[Test]
+    public function dashboard_provides_trend_and_employee_overview_arrays(): void
+    {
+        $user = User::factory()->create();
+
+        Employee::factory()->create(['status' => 'Active', 'created_at' => now()->subMonths(2)]);
+        Employee::factory()->create(['status' => 'Resigned', 'created_at' => now()->subMonths(3), 'updated_at' => now()->subMonths(1)]);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertViewHas('overviewMonths', function ($months) {
+            return is_array($months) && count($months) === 6;
+        });
+        $response->assertViewHas('overviewActive', function ($active) {
+            return is_array($active) && count($active) === 6;
+        });
+        $response->assertViewHas('overviewNew', function ($new) {
+            return is_array($new) && count($new) === 6;
+        });
+        $response->assertViewHas('overviewResigned', function ($resigned) {
+            return is_array($resigned) && count($resigned) === 6;
+        });
+        $response->assertViewHas('trendDays', function ($days) {
+            return is_array($days) && count($days) >= 1;
+        });
+    }
 }
