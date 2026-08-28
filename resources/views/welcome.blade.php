@@ -1657,21 +1657,21 @@
                     <div class="stat-item">
                         <span class="stat-icon"><span data-lucide="building-2"></span></span>
                         <div class="stat-content">
-                            <div class="stat-value">500+</div>
-                            <div class="stat-label">Perusahaan Aktif</div>
+                            <div class="stat-value">20+</div>
+                            <div class="stat-label">Retail Aktif</div>
                         </div>
                     </div>
                     <div class="stat-item">
                         <span class="stat-icon"><span data-lucide="users"></span></span>
                         <div class="stat-content">
-                            <div class="stat-value">10.000+</div>
+                            <div class="stat-value">120+</div>
                             <div class="stat-label">Pengguna Aktif</div>
                         </div>
                     </div>
                     <div class="stat-item">
                         <span class="stat-icon"><span data-lucide="server"></span></span>
                         <div class="stat-content">
-                            <div class="stat-value">99.9%</div>
+                            <div class="stat-value">98.9%</div>
                             <div class="stat-label">Uptime System</div>
                         </div>
                     </div>

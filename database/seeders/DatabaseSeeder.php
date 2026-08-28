@@ -42,5 +42,24 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('staff123'),
             'role' => 'staff',
         ]);
+
+        // HRD
+        User::create([
+            'name' => 'HRD KDM',
+            'username' => 'hrd',
+            'email' => 'hrd@kdm-mildos.test',
+            'password' => Hash::make('hrd123'),
+            'role' => 'hrd',
+        ]);
+
+        // EMPLOYEES & FACE ENROLLMENTS & ATTENDANCE & ACTIVITIES
+        $this->call([
+            EmployeeSeeder::class,
+            FaceEnrollmentSeeder::class,
+            AttendanceSeeder::class,
+            ActivitySeeder::class,
+            ShiftSeeder::class,
+            EventSeeder::class,
+        ]);
     }
 }
