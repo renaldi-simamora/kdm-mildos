@@ -474,6 +474,81 @@
             gap: 8px;
         }
 
+        /* Pagination */
+        nav[role="navigation"] {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        nav[role="navigation"] svg {
+            width: 16px !important;
+            height: 16px !important;
+            max-width: 100%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        nav[role="navigation"] .flex,
+        nav[role="navigation"] .inline-flex,
+        nav[role="navigation"] span.relative.z-0.inline-flex,
+        nav[role="navigation"] div.sm\:flex-1 {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px;
+        }
+
+        nav[role="navigation"] a,
+        nav[role="navigation"] span[aria-disabled="true"] > span,
+        nav[role="navigation"] span[aria-current="page"] > span,
+        nav[role="navigation"] span.relative.inline-flex {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 32px;
+            height: 32px;
+            padding: 0 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            box-sizing: border-box;
+        }
+
+        nav[role="navigation"] a:hover {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            border-color: #cbd5e1;
+        }
+
+        nav[role="navigation"] span[aria-current="page"] > span,
+        nav[role="navigation"] .active > span {
+            background-color: var(--yellow, #f59e0b) !important;
+            color: #111111 !important;
+            border-color: var(--yellow, #f59e0b) !important;
+            font-weight: 700;
+        }
+
+        nav[role="navigation"] span[aria-disabled="true"] > span {
+            color: #cbd5e1;
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+            cursor: not-allowed;
+        }
+
+        nav[role="navigation"] p {
+            display: none !important;
+        }
+
+        nav[role="navigation"] .sm\:hidden {
+            display: none !important;
+        }
+
         /* Responsive */
         @media (max-width: 900px) {
             .layout { grid-template-columns: 1fr; }
@@ -490,7 +565,14 @@
 
 <body>
 
-    <div class="layout" x-data="{ hrmOpen: true, crmOpen: false, bizOpen: false }">
+    <div class="layout" x-data="{ 
+        hrmOpen: {{ request()->routeIs('employees.*') || request()->routeIs('face-enrollments.*') ? 'true' : 'true' }}, 
+        offTimeOpen: {{ request()->routeIs('off-time-types.*') || request()->routeIs('off-times.*') ? 'true' : 'true' }}, 
+        attendanceOpen: {{ request()->routeIs('attendances.*') ? 'true' : 'true' }}, 
+        formRequestsOpen: {{ request()->routeIs('off-time-requests.*') || request()->routeIs('attendance-requests.*') || request()->routeIs('change-shift-requests.*') || request()->routeIs('overtime-requests.*') ? 'true' : 'true' }},
+        crmOpen: false, 
+        bizOpen: false 
+    }">
 
         {{-- ═══════════ SIDEBAR ═══════════ --}}
         <aside class="sidebar">
@@ -541,7 +623,7 @@
                     Customer
                     <span data-lucide="chevron-right" class="chevron"></span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{{ route('attendances.index') }}" class="nav-item {{ request()->routeIs('attendances.*') ? 'active' : '' }}">
                     <span data-lucide="calendar-check"></span>
                     Attendances
                     <span data-lucide="chevron-right" class="chevron"></span>
@@ -576,21 +658,68 @@
                     <span data-lucide="clock-4"></span>
                     Shift Management
                 </a>
-                <a href="#" class="nav-item">
+
+                <!-- Off Time Group -->
+                <div class="nav-item {{ request()->routeIs('off-time-types.*') || request()->routeIs('off-times.*') ? 'active' : '' }}" @click="offTimeOpen = !offTimeOpen">
                     <span data-lucide="calendar-x"></span>
                     Off Time
-                    <span data-lucide="chevron-right" class="chevron"></span>
-                </a>
-                <a href="#" class="nav-item">
+                    <span data-lucide="chevron-down" class="chevron" :style="offTimeOpen ? 'transform: rotate(180deg)' : ''"></span>
+                </div>
+
+                <div class="nav-submenu" x-show="offTimeOpen" x-transition>
+                    <a href="{{ route('off-time-types.index') }}" class="nav-subitem {{ request()->routeIs('off-time-types.*') ? 'active' : '' }}">
+                        <span data-lucide="circle-dot" style="width:12px; height:12px; margin-right:6px;"></span>
+                        Categories
+                    </a>
+                    <a href="{{ route('off-times.index') }}" class="nav-subitem {{ request()->routeIs('off-times.*') ? 'active' : '' }}">
+                        <span data-lucide="circle-dot" style="width:12px; height:12px; margin-right:6px;"></span>
+                        Off Times
+                    </a>
+                </div>
+
+                <!-- Attendance Group -->
+                <div class="nav-item {{ request()->routeIs('attendances.*') ? 'active' : '' }}" @click="attendanceOpen = !attendanceOpen">
                     <span data-lucide="calendar-check-2"></span>
                     Attendance
-                    <span data-lucide="chevron-right" class="chevron"></span>
-                </a>
-                <a href="#" class="nav-item">
+                    <span data-lucide="chevron-down" class="chevron" :style="attendanceOpen ? 'transform: rotate(180deg)' : ''"></span>
+                </div>
+
+                <div class="nav-submenu" x-show="attendanceOpen" x-transition>
+                    <a href="{{ route('attendances.index') }}" class="nav-subitem {{ request()->routeIs('attendances.index') ? 'active' : '' }}">
+                        <span data-lucide="circle-dot" style="width:12px; height:12px; margin-right:6px;"></span>
+                        Logs
+                    </a>
+                    <a href="{{ route('attendances.reports') }}" class="nav-subitem {{ request()->routeIs('attendances.reports') ? 'active' : '' }}">
+                        <span data-lucide="circle-dot" style="width:12px; height:12px; margin-right:6px;"></span>
+                        Reports
+                    </a>
+                </div>
+
+                <!-- Form Requests Group -->
+                <div class="nav-item {{ request()->routeIs('off-time-requests.*') || request()->routeIs('attendance-requests.*') || request()->routeIs('change-shift-requests.*') || request()->routeIs('overtime-requests.*') ? 'active' : '' }}" @click="formRequestsOpen = !formRequestsOpen">
                     <span data-lucide="file-text"></span>
                     Form Requests
-                    <span data-lucide="chevron-right" class="chevron"></span>
-                </a>
+                    <span data-lucide="chevron-down" class="chevron" :style="formRequestsOpen ? 'transform: rotate(180deg)' : ''"></span>
+                </div>
+
+                <div class="nav-submenu" x-show="formRequestsOpen" x-transition>
+                    <a href="{{ route('off-time-requests.index') }}" class="nav-subitem {{ request()->routeIs('off-time-requests.*') ? 'active' : '' }}">
+                        <span data-lucide="circle-dot" style="width:12px; height:12px; margin-right:6px;"></span>
+                        Off Time Request
+                    </a>
+                    <a href="{{ route('attendance-requests.index') }}" class="nav-subitem {{ request()->routeIs('attendance-requests.*') ? 'active' : '' }}">
+                        <span data-lucide="circle-dot" style="width:12px; height:12px; margin-right:6px;"></span>
+                        Attendance Requests
+                    </a>
+                    <a href="{{ route('change-shift-requests.index') }}" class="nav-subitem {{ request()->routeIs('change-shift-requests.*') ? 'active' : '' }}">
+                        <span data-lucide="circle-dot" style="width:12px; height:12px; margin-right:6px;"></span>
+                        Change Shifts Request
+                    </a>
+                    <a href="{{ route('overtime-requests.index') }}" class="nav-subitem {{ request()->routeIs('overtime-requests.*') ? 'active' : '' }}">
+                        <span data-lucide="circle-dot" style="width:12px; height:12px; margin-right:6px;"></span>
+                        Overtime Requests
+                    </a>
+                </div>
             </nav>
 
             <div class="sidebar-footer">

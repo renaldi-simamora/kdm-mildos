@@ -34,6 +34,16 @@ class Employee extends Model
         return $this->hasMany(FaceEnrollment::class);
     }
 
+    public function offTimes()
+    {
+        return $this->hasMany(OffTime::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
     public function scopeSearch($query, ?string $search)
     {
         if (! empty($search)) {

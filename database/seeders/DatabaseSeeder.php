@@ -52,10 +52,12 @@ class DatabaseSeeder extends Seeder
             'role' => 'hrd',
         ]);
 
-        // EMPLOYEES & FACE ENROLLMENTS & ATTENDANCE & ACTIVITIES
+        // EMPLOYEES & FACE ENROLLMENTS & ATTENDANCE & ACTIVITIES & OFF TIMES
         $this->call([
             EmployeeSeeder::class,
             FaceEnrollmentSeeder::class,
+            OffTimeTypeSeeder::class,
+            OffTimeSeeder::class,
             AttendanceSeeder::class,
             ActivitySeeder::class,
             ShiftSeeder::class,
