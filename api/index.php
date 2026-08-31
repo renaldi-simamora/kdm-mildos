@@ -42,15 +42,24 @@ if (is_dir($srcCache)) {
 putenv('APP_STORAGE_PATH='.$tmpStorage);
 putenv('APP_BOOTSTRAP_CACHE_PATH='.$tmpBootstrap.'/cache');
 
-// Serverless-safe drivers (no database connection needed for sessions/cache)
+// Ensure Laravel doesn't use cached config/routes from build time if they exist
+putenv('APP_CONFIG_CACHE='.$tmpBootstrap.'/cache/config.php');
+putenv('APP_ROUTES_CACHE='.$tmpBootstrap.'/cache/routes.php');
+putenv('APP_EVENTS_CACHE='.$tmpBootstrap.'/cache/events.php');
+
+// Serverless-safe drivers
 putenv('SESSION_DRIVER=file');
 putenv('CACHE_STORE=file');
 putenv('LOG_CHANNEL=stderr');
 
 // ── 4. Patch Laravel's storagePath and bootstrapPath at runtime ────────────
-// We monkey-patch the Application instance right after it is created
-// by wrapping the bootstrap/app.php require via an output buffer trick.
 require_once __DIR__.'/../vendor/autoload.php';
+
+// Check if we need to clear configuration cache at runtime (optional but safe for first boot)
+if (!file_exists($tmpBootstrap.'/cache/config.php')) {
+    // We don't actually run 'php artisan' here as it's slow, 
+    // but by setting the paths to /tmp, we start fresh.
+}
 
 $app = require __DIR__.'/../bootstrap/app.php';
 
