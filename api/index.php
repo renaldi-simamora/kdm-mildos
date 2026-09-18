@@ -1,11 +1,13 @@
 <?php
 
-// Ensure serverless storage folders exist in /tmp
+// Prepare storage directory structure in /tmp for serverless environment
 $storageDirs = [
     '/tmp/storage/framework/views',
-    '/tmp/storage/framework/cache',
+    '/tmp/storage/framework/cache/data',
     '/tmp/storage/framework/sessions',
     '/tmp/storage/logs',
+    '/tmp/storage/app/public',
+    '/tmp/bootstrap/cache',
 ];
 
 foreach ($storageDirs as $dir) {
@@ -30,5 +32,10 @@ if (! $dbDatabase || $dbDatabase === $defaultSqlite || ! str_contains($dbDatabas
     $_ENV['DB_DATABASE'] = $tmpSqlite;
     $_SERVER['DB_DATABASE'] = $tmpSqlite;
 }
+
+// Set storage path for serverless
+putenv('APP_STORAGE=/tmp/storage');
+$_ENV['APP_STORAGE'] = '/tmp/storage';
+$_SERVER['APP_STORAGE'] = '/tmp/storage';
 
 require __DIR__.'/../public/index.php';
