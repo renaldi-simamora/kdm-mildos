@@ -15,10 +15,11 @@ foreach ($storageDirs as $dir) {
 }
 
 // Ensure SQLite database exists in writable /tmp if using SQLite
-if (! getenv('DB_DATABASE') || getenv('DB_DATABASE') === database_path('database.sqlite')) {
-    $defaultSqlite = __DIR__.'/../database/database.sqlite';
-    $tmpSqlite = '/tmp/database.sqlite';
+$dbDatabase = getenv('DB_DATABASE');
+$defaultSqlite = __DIR__.'/../database/database.sqlite';
+$tmpSqlite = '/tmp/database.sqlite';
 
+if (! $dbDatabase || $dbDatabase === $defaultSqlite || ! str_contains($dbDatabase, '/tmp/')) {
     if (file_exists($defaultSqlite) && ! file_exists($tmpSqlite)) {
         copy($defaultSqlite, $tmpSqlite);
     } elseif (! file_exists($tmpSqlite)) {
